@@ -58,6 +58,9 @@ exports.postEditarProducto = (req, res, next) => {
 
   Producto.findById(idProducto)
     .then(producto => {
+      if (producto.idUsuario.toString() !== req.usuario._id.toString()) {
+        return res.redirect('/');
+      }
       producto.nombre = nombre;
       producto.precio = precio;
       producto.descripcion = descripcion;
@@ -73,7 +76,8 @@ exports.postEditarProducto = (req, res, next) => {
 
 exports.getProductos = (req, res, next) => {
   Producto
-    .find()
+    //.find()
+    .find({ idUsuario: req.usuario._id })
     //.select('nombre precio -_id')
     .then(productos => {
       console.log(productos)
@@ -89,7 +93,7 @@ exports.getProductos = (req, res, next) => {
 
 exports.postEliminarProducto = (req, res, next) => {
   const idProducto = req.body.idProducto;
-  Producto.findByIdAndDelete(idProducto)
+  Producto.deleteOne({ _id: idProducto, idUsuario: req.usuario._id })
     .then(() => {
       console.log('PRODUCTO ELIMINADO');
       res.redirect('/admin/productos');
